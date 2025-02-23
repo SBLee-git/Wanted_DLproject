@@ -1,4 +1,6 @@
-# Wanted_DLproject-3
+# Wanted_DLproject
+
+https://www.notion.so/DL_project-1a0aa52f04eb80798a9cc87b0f1f506f
 
 
 ## GIT 명령어 관련

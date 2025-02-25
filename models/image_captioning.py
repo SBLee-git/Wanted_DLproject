@@ -5,7 +5,11 @@ import torch
 from transformers import AutoProcessor, LlavaForConditionalGeneration, BitsAndBytesConfig, LlavaProcessor
 
 
-def generate_image_caption(img_url, model_id="llava-hf/llava-1.5-7b-hf", prompt_text="Describe the image in detail."):
+def generate_image_caption(
+    img_url,
+    # model_id="llava-hf/llava-1.5-7b-hf",
+    prompt_text="Describe the image in detail."
+):
     """
     LLaVA 모델을 사용하여 이미지 캡션을 생성하는 함수.
     
@@ -34,7 +38,7 @@ def generate_image_caption(img_url, model_id="llava-hf/llava-1.5-7b-hf", prompt_
 
     # 모델 및 프로세서 로드
     # processor = LlavaProcessor.from_pretrained(model_id, use_fast=True)
-    processor = LlavaProcessor.from_pretrained(local_model_path, use_fast=True)
+    processor = LlavaProcessor.from_pretrained(local_model_path, use_fast=False)
     model = LlavaForConditionalGeneration.from_pretrained(
         # model_id,
         local_model_path,
@@ -71,8 +75,8 @@ def generate_image_caption(img_url, model_id="llava-hf/llava-1.5-7b-hf", prompt_
         output_ids = model.generate(**inputs, max_new_tokens=200, do_sample=False)
 
     # 결과 디코딩
-    caption = processor.decode(output_ids[0][2:], skip_special_tokens=True)
-    print('test1', processor.decode(output_ids[0][6:], skip_special_tokens=True))
+    # caption = processor.decode(output_ids[0][3:], skip_special_tokens=True)
+    caption = processor.decode(output_ids[0], skip_special_tokens=True)
 
     # 실행 시간 계산
     execution_time = datetime.now() - start_time
@@ -83,11 +87,13 @@ def generate_image_caption(img_url, model_id="llava-hf/llava-1.5-7b-hf", prompt_
 if __name__ == "__main__":
     img_url = input("Enter the image URL: ").strip()
     if not img_url:
-        img_url = "https://storage.googleapis.com/sfr-vision-language-research/BLIP/demo.jpg"
+        # img_url = "https://storage.googleapis.com/sfr-vision-language-research/BLIP/demo.jpg"
+        img_url = "https://search.pstatic.net/common/?src=http%3A%2F%2Fcafefiles.naver.net%2FMjAxOTA5MTNfMzIg%2FMDAxNTY4MzY1NjY5ODg5.BQj_C13jNjHbjJA06-8TqRKAOzWBIzmd-TI6k4uKhvIg.Zk4o2ehGsRDLLNy6LRGly4_M1zFXjwT9bX9_jkigLTkg.JPEG%2FexternalFile.jpg&type=sc960_832"
     caption, exec_time = generate_image_caption(img_url)
     
     print("Execution Time:", exec_time)
-    print("\nGenerated Caption:\n", caption)
+    # print("\nGenerated Caption:\n", caption)
+    print("\nGenerated Caption:\n", caption.split('\n'))
 
 
 

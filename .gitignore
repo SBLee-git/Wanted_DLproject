@@ -1,7 +1,5 @@
 /config/
-<<<<<<< HEAD
 */data/
-=======
 /models/llava*
 *.pth
->>>>>>> 1d44bdd8a7ec8d7687fc62e6b0201ba9e53e12a8
+

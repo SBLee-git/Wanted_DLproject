@@ -4,7 +4,7 @@ import os
 # 프로젝트 루트 디렉토리를 파이썬 경로에 추가
 sys.path.append(os.path.abspath("."))
 
-from models.image_captioning import generate_image_caption
+from models.image_captioning import LlavaImageCaptioning
 from models.llm_gemini import generate_question_from_caption, generate_followup_question, generate_diary_draft
 # from models.emotion_analysis import analyze_emotion
 def analyze_emotion(text):
@@ -15,6 +15,7 @@ def recommend_activity(text):
 def recommend_product(text):
     return "술"
 # from models.insights import generate_insights
+caption_generator = LlavaImageCaptioning()
 
 class ChatbotService:
     """
@@ -44,7 +45,8 @@ class ChatbotService:
         """
         이미지 캡션 생성
         """
-        self.caption = generate_image_caption(image_path)
+        image = caption_generator.load_image_from_url(image_path)
+        self.caption = caption_generator.generate_caption(image)
         return self.caption
 
     def generate_initial_question(self) -> str:

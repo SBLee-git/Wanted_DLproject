@@ -4,18 +4,14 @@ import os
 # 프로젝트 루트 디렉토리를 파이썬 경로에 추가
 sys.path.append(os.path.abspath("."))
 
-from models.image_captioning import LlavaImageCaptioning
 from models.llm_gemini import generate_question_from_caption, generate_followup_question, generate_diary_draft
-# from models.emotion_analysis import analyze_emotion
-def analyze_emotion(text):
-    return "무난"
-# from models.recommendation import recommend_activity, recommend_product
-def recommend_activity(text):
-    return "산책"
+from models.image_captioning import LlavaImageCaptioning
+from models.emotion_classification import EmotionClassifier
+from models.semantic_embedding import SongRecommender
 def recommend_product(text):
     return "술"
 # from models.insights import generate_insights
-caption_generator = LlavaImageCaptioning()
+
 
 class ChatbotService:
     """
@@ -31,6 +27,10 @@ class ChatbotService:
         self.caption = ""  # 이미지 캡션 저장
         self.conversation_history = []  # 대화 기록
         self.emotion_history = []  # 감정 기록 (사용자 감정 분류 데이터)
+        self.diary_summary = ""
+        self.caption_generator = LlavaImageCaptioning()
+        self.emotion_classifier = EmotionClassifier()
+        self.song_recommander = SongRecommender()
 
     def record_interaction(self, speaker: str, content: str) -> None:
         """
@@ -45,8 +45,8 @@ class ChatbotService:
         """
         이미지 캡션 생성
         """
-        image = caption_generator.load_image_from_url(image_path)
-        self.caption = caption_generator.generate_caption(image)
+        image = self.caption_generator.load_image_from_url(image_path)
+        self.caption = self.caption_generator.generate_caption(image)
         return self.caption
 
     def generate_initial_question(self) -> str:
@@ -67,7 +67,7 @@ class ChatbotService:
         self.record_interaction("User", user_answer)
 
         # 감정 분석
-        emotion_result = analyze_emotion(user_answer)
+        emotion_result = self.emotion_classifier.predict_emotion(user_answer)
         self.emotion_history.append(emotion_result)
 
         # 후속 질문 생성
@@ -76,20 +76,26 @@ class ChatbotService:
 
         return followup_question
 
-    def generate_diary_draft(self) -> str:
+    def summarize_conversation(self) -> str:
         """
-        대화 내용을 기반으로 일기 초안을 생성
+        일기 초안을 위한 대화 내용 요약
         """
-        return generate_diary_draft(self.conversation_history)
+        summary = generate_diary_draft(self.conversation_history)
+        total_emotion = self.emotion_classifier.predict_emotion(user_answer)
+        self.emotion_history.append(total_emotion)
+        self.diary_summary = summary
+        return
 
-    def recommend_activity(self) -> str:
+    def recommend_song(self) -> str:
         """
-        감정 분석 결과를 기반으로 활동을 추천
+        감정 분석 결과를 기반으로 노래를 추천
         """
         if not self.emotion_history:
             return "아직 감정 데이터를 분석하지 않았습니다."
-        latest_emotion = self.emotion_history[-1]
-        return recommend_activity(latest_emotion)
+        final_emotion = self.emotion_history[-1]
+        text = self.diary_summary
+        recommend_info = self.song_recommander.recommend_song(text, final_emotion)
+        return recommend_info
 
     def recommend_product(self) -> str:
         """
@@ -155,14 +161,19 @@ if __name__ == "__main__":
         if user_answer.lower() == "exit":
             print("\n💡 대화를 종료합니다.")
             break
-
         followup_question = chatbot.generate_followup_question(user_answer)
+        print("emotion:", chatbot.emotion_history[-1])
         print("\n🤖 AI:", followup_question)
 
-    diary_draft = chatbot.generate_diary_draft()
-    print("\n📖 일기 초안:\n", diary_draft)
+    chatbot.summarize_conversation()
+    print("\n📖 일기 초안:\n", chatbot.diary_summary)
+    print("final emotion:", chatbot.emotion_history[-1])
+    
+    recommend_info = chatbot.recommend_song()
+    print("트로트 추천:\n", recommend_info)
 
     print(f"\n✅ 로그 기록 완료: {log_path}\n\n\n")
 
     # 로그 파일 닫기
     log_file.close()
+    

@@ -35,7 +35,14 @@ $ git merge
 
 
 ### 서버에서 작업할 때
-
+```
 git -c user.name="YourName" -c user.email="YourEmail@example.com" add .  
 git -c user.name="YourName" -c user.email="YourEmail@example.com" commit -m "커밋 메시지"  
 git -c user.name="YourName" -c user.email="YourEmail@example.com" push
+```
+
+
+### 샘플 테스트 실행
+```
+python ./service/deep_diary.py
+```

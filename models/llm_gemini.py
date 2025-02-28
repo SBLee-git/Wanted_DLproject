@@ -14,7 +14,7 @@ genai.configure(api_key=gemini_key)
 # 사용할 모델 선택
 model = genai.GenerativeModel('gemini-2.0-flash')
 
-ROLE_DESCRIPTION = "당신은 사용자가 일기를 편리하게 쓸 수 있도록 도와주는 서비스입니다."
+ROLE_DESCRIPTION = "당신은 사용자가 일기를 편리하게 쓸 수 있도록 도와주는 서비스입니다. 모든 답변은 한글 존댓말을 사용하세요."
 
 def generate_question_from_caption(caption: str) -> str:
     """
@@ -24,8 +24,8 @@ def generate_question_from_caption(caption: str) -> str:
     캡셔닝 결과: {caption}
     요청사항: {ROLE_DESCRIPTION}
     사용자가 촬영하여 업로드한 이미지의 캡셔닝 결과를 바탕으로,
-    이미지에서 일기에 쓸 만한 주제를 자연스럽게 한 줄로 언급하고,
-    흥미롭고 답변하기 쉬운 한 가지 질문을 한글로 만들어주세요.
+    이미지에서 일기에 쓸 만한 주제를 언급하고,
+    흥미롭고 답변하기 쉬운 한 가지 질문을 자연스럽게 한 줄의 문장으로 만들어주세요.
     """
     response = model.generate_content(prompt)
     return response.text.strip()

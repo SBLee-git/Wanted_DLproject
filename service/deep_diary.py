@@ -42,14 +42,14 @@ class ChatbotService:
 
     def generate_image_caption(self, image_path: str) -> str:
         """
-        이미지 캡션을 생성하는 메서드.
+        이미지 캡션 생성
         """
         self.caption = generate_image_caption(image_path)
         return self.caption
 
     def generate_initial_question(self) -> str:
         """
-        이미지 캡셔닝 결과를 기반으로 첫 번째 질문을 생성하는 메서드.
+        이미지 캡셔닝 결과를 기반으로 첫 번째 질문 생성
         """
         if not self.caption:
             raise ValueError("캡션이 설정되지 않았습니다. 먼저 이미지 캡션을 생성하세요.")
@@ -60,7 +60,7 @@ class ChatbotService:
 
     def generate_followup_question(self, user_answer: str) -> str:
         """
-        사용자의 답변을 바탕으로 후속 질문을 생성하는 메서드.
+        사용자의 답변을 바탕으로 후속 질문을 생성
         """
         self.record_interaction("User", user_answer)
 
@@ -76,13 +76,13 @@ class ChatbotService:
 
     def generate_diary_draft(self) -> str:
         """
-        대화 내용을 기반으로 일기 초안을 생성하는 메서드.
+        대화 내용을 기반으로 일기 초안을 생성
         """
         return generate_diary_draft(self.conversation_history)
 
     def recommend_activity(self) -> str:
         """
-        감정 분석 결과를 기반으로 활동을 추천하는 메서드.
+        감정 분석 결과를 기반으로 활동을 추천
         """
         if not self.emotion_history:
             return "아직 감정 데이터를 분석하지 않았습니다."
@@ -91,7 +91,7 @@ class ChatbotService:
 
     def recommend_product(self) -> str:
         """
-        감정 분석 결과 및 일기 내용을 기반으로 상품을 추천하는 메서드.
+        감정 분석 결과 및 일기 내용을 기반으로 상품을 추천
         """
         if not self.emotion_history:
             return "아직 감정 데이터를 분석하지 않았습니다."
@@ -112,6 +112,7 @@ if __name__ == "__main__":
 
     while True:
         user_answer = input("\n👤 사용자 답변 (종료하려면 'exit' 입력): ").strip()
+        print("\n🙂 User:", user_answer)
         if user_answer.lower() == "exit":
             print("\n💡 대화를 종료합니다.")
             break

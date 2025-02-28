@@ -98,12 +98,49 @@ class ChatbotService:
         latest_emotion = self.emotion_history[-1]
         return recommend_product(latest_emotion)
 
-# =================== 사용 예시 ===================
+# =================== 사용 예시 (로그 & 터미널 동시 출력) ===================
+
+class DualOutput:
+    """
+    표준 출력(sys.stdout)과 로그 파일 출력을 동시에 수행하는 클래스
+    """
+    def __init__(self, terminal, log_file):
+        self.terminal = terminal  # 터미널 출력 (기본 sys.stdout)
+        self.log_file = log_file  # 로그 파일 출력 스트림
+
+    def write(self, message):
+        self.terminal.write(message)  # 터미널에 출력
+        self.log_file.write(message)  # 로그 파일에도 기록
+        self.terminal.flush()
+        self.log_file.flush()
+
+    def flush(self):
+        """
+        Python의 출력 버퍼를 비우기 위한 메서드
+        """
+        self.terminal.flush()
+        self.log_file.flush()
+
 
 if __name__ == "__main__":
+    from datetime import datetime
+    
+    # 로그 파일 경로 설정 (YYYYMMDD_log.txt 형식)
+    log_filename = datetime.now().strftime("%Y%m%d") + "_log.txt"
+    log_path = os.path.join("service/logs", log_filename)
+
+    # 로그 파일 열기
+    log_file = open(log_path, "a", encoding="utf-8")
+
+    # 터미널 & 파일 동시에 출력하도록 변경
+    sys.stdout = DualOutput(sys.stdout, log_file)
+
+    print(f"{datetime.now().time()}, 로그 기록 시작: {log_path}\n")
+
     chatbot = ChatbotService()
 
     img_url = input("Enter the image URL: ").strip()
+    print(img_url)
     caption = chatbot.generate_image_caption(img_url)
     print("\n📷 이미지 캡션 생성:", caption)
 
@@ -122,3 +159,8 @@ if __name__ == "__main__":
 
     diary_draft = chatbot.generate_diary_draft()
     print("\n📖 일기 초안:\n", diary_draft)
+
+    print(f"\n✅ 로그 기록 완료: {log_path}\n\n\n")
+
+    # 로그 파일 닫기
+    log_file.close()

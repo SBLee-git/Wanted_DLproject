@@ -41,6 +41,8 @@ git -c user.name="YourName" -c user.email="YourEmail@example.com" commit -m "커
 git -c user.name="YourName" -c user.email="YourEmail@example.com" push
 ```
 
+### 서버 접속 (교육장 내에서)
+$ ssh wanted-1@192.168.10.96
 
 ### 샘플 테스트 실행
 ```

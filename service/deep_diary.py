@@ -8,8 +8,6 @@ from models.llm_gemini import generate_question_from_caption, generate_followup_
 from models.image_captioning import LlavaImageCaptioning
 from models.emotion_classification import EmotionClassifier
 from models.semantic_embedding import SongRecommender
-def recommend_product(text):
-    return "술"
 # from models.insights import generate_insights
 
 
@@ -81,7 +79,7 @@ class ChatbotService:
         일기 초안을 위한 대화 내용 요약
         """
         summary = generate_diary_draft(self.conversation_history)
-        total_emotion = self.emotion_classifier.predict_emotion(user_answer)
+        total_emotion = self.emotion_classifier.predict_emotion(summary)
         self.emotion_history.append(total_emotion)
         self.diary_summary = summary
         return
@@ -95,16 +93,9 @@ class ChatbotService:
         final_emotion = self.emotion_history[-1]
         text = self.diary_summary
         recommend_info = self.song_recommander.recommend_song(text, final_emotion)
+        print(recommend_info)
         return recommend_info
 
-    def recommend_product(self) -> str:
-        """
-        감정 분석 결과 및 일기 내용을 기반으로 상품을 추천
-        """
-        if not self.emotion_history:
-            return "아직 감정 데이터를 분석하지 않았습니다."
-        latest_emotion = self.emotion_history[-1]
-        return recommend_product(latest_emotion)
 
 # =================== 사용 예시 (로그 & 터미널 동시 출력) ===================
 

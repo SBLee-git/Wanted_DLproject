@@ -72,7 +72,7 @@ class SongRecommender:
             "title": best_match[0],
             "artist": best_match[1],
             "lyrics": best_match[2],
-            "similarity": best_match[3]
+            "similarity": round(float(best_match[3]), 4)
         }
         
         

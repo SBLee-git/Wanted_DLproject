@@ -2,4 +2,5 @@
 */data/
 /models/llava*
 *.pth
+*/__pycache__/
 

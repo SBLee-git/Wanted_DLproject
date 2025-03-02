@@ -23,23 +23,24 @@ def generate_question_from_caption(caption: str) -> str:
     prompt = f"""
     캡셔닝 결과: {caption}
     요청사항: {ROLE_DESCRIPTION}
-    사용자가 촬영하여 업로드한 이미지의 캡셔닝 결과를 바탕으로,
+    사용자가 촬영하여 업로드한 사진의 설명을 바탕으로,
     이미지에서 일기에 쓸 만한 주제를 언급하고,
     흥미롭고 답변하기 쉬운 한 가지 질문을 자연스럽게 한 줄의 문장으로 만들어주세요.
     """
     response = model.generate_content(prompt)
     return response.text.strip()
 
-def generate_followup_question(conversation_history: list, caption: str) -> str:
+def generate_followup_question(conversation_history: list, caption: str, emotion: str = "중립") -> str:
     """
     대화 기록을 바탕으로 후속 질문 생성
     """
     history_text = "\n".join(conversation_history)
 
     prompt = f"""
-    캡셔닝 결과: "{caption}"
+    업로드한 사진: "{caption}"
+    사용자의 감정: "{emotion}"
     지금까지의 대화 기록:
-    {history_text}
+    {history_text} 
 
     요청사항: {ROLE_DESCRIPTION}
     위의 내용을 참고하여, 일기 작성을 좀 더 구체화하거나 흥미로운 이야기를 이끌어낼 수 있는 한 가지 후속 질문을 한글로 만들어주세요.

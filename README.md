@@ -36,9 +36,9 @@ $ git merge
 
 ### 서버에서 작업할 때
 ```
-git -c user.name="YourName" -c user.email="YourEmail@example.com" add .  
-git -c user.name="YourName" -c user.email="YourEmail@example.com" commit -m "커밋 메시지"  
-git -c user.name="YourName" -c user.email="YourEmail@example.com" push
+$ git -c user.name="YourName" -c user.email="YourEmail@example.com" add .  
+$ git -c user.name="YourName" -c user.email="YourEmail@example.com" commit -m "커밋 메시지"  
+$ git -c user.name="YourName" -c user.email="YourEmail@example.com" push
 ```
 
 ### 서버 접속 (교육장 내에서)
@@ -48,3 +48,9 @@ $ ssh wanted-1@192.168.10.96
 ```
 python ./service/deep_diary.py
 ```
+
+### API 서버 실행 및 테스트
+```
+$ uvicorn service.main:app --host 0.0.0.0 --port 8031 --reload
+```
+http://localhost:8031/docs

@@ -4,4 +4,4 @@
 *.pth
 */__pycache__/
 */logs/
-*/uploads/
+/uploads/

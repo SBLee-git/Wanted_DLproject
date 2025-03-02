@@ -34,14 +34,18 @@ class LlavaImageCaptioning:
             model (LlavaForConditionalGeneration): LLaVA 모델 객체
         """
         print("모델을 로드 중...")
-        # BitsAndBytes 4-bit 양자화 설정
-        bnb_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_compute_dtype=torch.float16,
-            bnb_4bit_use_double_quant=True,
-            bnb_4bit_quant_type="nf4"
-        )
-
+        try:
+            # BitsAndBytes 4-bit 양자화 설정
+            bnb_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_quant_type="nf4"
+            )
+        except:  # TODO
+            bnb_config = BitsAndBytesConfig(
+                load_in_4bit=False  # CPU에서는 4비트 양자화 지원 X
+            )
         # 프로세서 및 모델 로드
         processor = LlavaProcessor.from_pretrained(self.model_path, use_fast=False)
         model = LlavaForConditionalGeneration.from_pretrained(

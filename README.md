@@ -41,12 +41,24 @@ $ git -c user.name="YourName" -c user.email="YourEmail@example.com" commit -m "�
 $ git -c user.name="YourName" -c user.email="YourEmail@example.com" push
 ```
 
-### 서버 접속 (교육장 내에서)
+### 서버 접속
+```
+# 교육장 내부 접속
 $ ssh wanted-1@192.168.10.96
+```
+```
+# 외부 접속(tailscale 이용)
+$ ssh wanted-1@100.83.113.125
+```
+
+### 모델 복사
+```
+scp -r wanted-1@100.83.113.125:/home/wanted-1/potenup-workspace/Project/project3/team1/Wanted_DLproject/models/llava-1.5-7b-hf/ ./models/.
+```
 
 ### 샘플 테스트 실행
 ```
-python ./service/deep_diary.py
+$ python ./service/deep_diary.py
 ```
 
 ### API 서버 실행 및 테스트

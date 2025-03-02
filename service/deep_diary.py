@@ -39,12 +39,26 @@ class ChatbotService:
         if len(self.conversation_history) > 20:  # 최대 20개
             self.conversation_history.pop(0)
 
-    def generate_image_caption(self, image_path: str) -> str:
+    def generate_image_caption(self, image_source: str, is_file: bool = False) -> str:
         """
-        이미지 캡션 생성
+        이미지 캡션 생성 (URL 및 파일 지원)
+
+        Args:
+            image_source (str): 이미지 URL 또는 파일 경로
+            is_file (bool): True이면 파일에서 로드, False이면 URL에서 로드 (기본값: False)
+
+        Returns:
+            str: 생성된 이미지 캡션
         """
-        image = self.caption_generator.load_image_from_url(image_path)
-        self.caption = self.caption_generator.generate_caption(image)
+        if is_file:
+            image = self.caption_generator.load_image_from_file(image_source)
+        else:
+            image = self.caption_generator.load_image_from_url(image_source)
+
+        if image is None:
+            raise ValueError("이미지를 불러올 수 없습니다. URL 또는 파일 경로를 확인하세요.")
+
+        self.caption, _ = self.caption_generator.generate_caption(image)
         return self.caption
 
     def generate_initial_question(self) -> str:

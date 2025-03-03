@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath("."))
 from models.llm_gemini import generate_question_from_caption, generate_followup_question, generate_diary_draft
 from models.image_captioning import LlavaImageCaptioning
 from models.emotion_classification import EmotionClassifier
-from models.semantic_embedding import SongRecommender
+from models.semantic_embedding import E5Embedder, SongRecommender
 # from models.insights import generate_insights
 
 
@@ -28,6 +28,7 @@ class ChatbotService:
         self.diary_summary = ""
         self.caption_generator = LlavaImageCaptioning()
         self.emotion_classifier = EmotionClassifier()
+        self.embedder = E5Embedder()
         self.song_recommander = SongRecommender()
 
     def record_interaction(self, speaker: str, content: str) -> None:
@@ -106,7 +107,8 @@ class ChatbotService:
             return "아직 감정 데이터를 분석하지 않았습니다."
         final_emotion = self.emotion_history[-1]
         text = self.diary_summary
-        recommend_info = self.song_recommander.recommend_song(text, final_emotion)
+        embedding = self.embedder.get_embedding(text)
+        recommend_info = self.song_recommander.recommend_song(embedding, final_emotion)
         print(recommend_info)
         return recommend_info
 

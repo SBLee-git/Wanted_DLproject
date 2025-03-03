@@ -6,7 +6,7 @@ import io
 # FastAPI 서버 주소: 상황에 맞춰 바꿔주세요
 API_URL = "http://localhost:8031"
 
-st.set_page_config(page_title="AI 일기 도우미", layout="centered")
+st.set_page_config(page_title="Deep Diary", layout="centered")
 
 # 세션 스테이트 초기화
 if "chat_history" not in st.session_state:
@@ -19,7 +19,7 @@ def add_message(role, content):
 # --------------------------------
 #   상단 영역: 이미지 업로드
 # --------------------------------
-st.title("AI 일기 도우미")
+st.title("Deep Diary")
 
 uploaded_file = st.file_uploader("오늘의 사진을 업로드해주세요", type=["jpg", "jpeg", "png"])
 if uploaded_file is not None:

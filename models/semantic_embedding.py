@@ -43,7 +43,7 @@ class SongRecommender:
             raise ValueError("데이터프레임에 'embedding' 또는 'emotion' 컬럼이 없습니다. 확인해주세요.")
         self.embedder = E5Embedder()
 
-    def recommend_song(self, text, emotion):
+    def recommend_song(self, diary_embedding, emotion):
         """
         감정이 동일한 노래 중에서 가장 유사한 노래 추천.
         Args:
@@ -52,8 +52,7 @@ class SongRecommender:
         Returns:
             dict: 가장 유사한 트로트 가사 정보
         """
-        diary_embedding = self.embedder.get_embedding(text)
-        
+
         filtered_df = self.df[self.df["emotion"] == emotion]
 
         # 감정이 일치하는 곡이 없는 경우

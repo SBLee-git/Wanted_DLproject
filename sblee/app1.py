@@ -11,6 +11,12 @@ st.set_page_config(page_title="AI 일기 도우미", layout="centered")
 # 세션 스테이트 초기화
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+# 추가 부분: 일기 요약 or 초안 저장 
+if "diary_summary" not in st.session_state:
+    st.session_state.diary_summary = ""
+
+if "final_diary" not in st.session_state:
+    st.session_state.final_diary = ""
 
 def add_message(role, content):
     """챗 메시지를 session_state에 저장"""
@@ -79,7 +85,10 @@ with st.sidebar:
             diary_summary = data["diary_summary"]
             final_emotion = data["final_emotion"]
             summary_text = f"**일기 요약**: {diary_summary}\n\n**최종 감정**: {final_emotion}"
+            
+            # 화면에 표시 & 세션 저장
             add_message("assistant", summary_text)
+            st.session_state.diary_summary = diary_summary
         else:
             st.error("일기 요약 요청 실패: " + resp.text)
 
@@ -110,6 +119,30 @@ with st.sidebar:
         else:
             st.error("트로트 추천 실패: " + resp.text)
 
+##################################################
+#  최종 일기 수정(새 기능)
+##################################################
+st.markdown("---")
+st.subheader("일기 초안 수정하기")
+
+# 사용자가 수정할 내용 입력
+user_changes = st.text_area("일기 초안에 대해 수정/추가하고 싶은 내용을 자유롭게 적어보세요.")
+
+if st.button("최종 일기 만들기"):
+    if not st.session_state.diary_summary:
+        st.warning("아직 일기 요약본이 없습니다. '일기 마무리하기'를 먼저 진행해주세요.")
+    else:
+        if not user_changes.strip():
+            st.warning("수정 사항을 입력해 주세요.")
+        else:
+            with st.spinner("최종 일기를 만드는 중..."):
+                final_diary = incorporate_user_changes(
+                    original_draft=st.session_state.diary_summary,
+                    user_changes=user_changes
+                )
+            # 결과 저장 & 표시
+            st.session_state.final_diary = final_diary
+            add_message("assistant", "### 최종 일기\n\n" + final_diary)
 
 # --------------------------------
 #   대화 내역 표시 (마지막)

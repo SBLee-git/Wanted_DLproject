@@ -13,28 +13,28 @@ if "s" not in st.session_state:
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# 일기 요약 (초안) 저장
+# 일기 요약 (초안)
 if "diary_summary" not in st.session_state:
     st.session_state.diary_summary = ""
 
-# 사용자가 수정한 최종 일기 저장
+# 최종 일기
 if "final_diary" not in st.session_state:
     st.session_state.final_diary = ""
 
-# 수정 입력 텍스트 저장
+# 수정 입력 텍스트
 if "user_changes" not in st.session_state:
     st.session_state.user_changes = ""
 
 # 일기 마무리 여부
 if "diary_completed" not in st.session_state:
-    st.session_state.diary_completed = False  # False: 마무리 전, True: 마무리 후
+    st.session_state.diary_completed = False
 
-# 노래 추천 결과 저장
+# 노래 추천 결과
 if "song_recommendation" not in st.session_state:
     st.session_state.song_recommendation = ""
 
 def add_message(role, content):
-    """채팅 메시지를 session_state에 저장"""
+    """챗 메시지를 session_state에 저장"""
     st.session_state.chat_history.append({"role": role, "content": content})
 
 #############################################
@@ -43,7 +43,7 @@ def add_message(role, content):
 st.set_page_config(page_title="Deep Diary", layout="centered")
 st.title("📖 Deep Diary")
 
-API_URL = "http://localhost:8031"
+API_URL = "http://localhost:8031"  # FastAPI 서버 주소
 
 #############################################
 # 3. (A) 이미지 업로드 섹션
@@ -51,8 +51,8 @@ API_URL = "http://localhost:8031"
 st.subheader("📷 오늘의 사진 업로드")
 
 uploaded_file = st.file_uploader("이미지를 업로드하세요", type=["jpg", "jpeg", "png"])
-
 col1, col2 = st.columns([2,1], gap="small")
+
 with col1:
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
@@ -78,7 +78,7 @@ with col2:
                 st.error(f"서버 요청 실패: {e}")
 
 #############################################
-# 4. (B) 첫 질문 섹션 (현재 질문 제거)
+# 4. (B) 첫 질문 섹션
 #############################################
 st.subheader("📝 일기 쓰기 시작")
 if st.button("첫 질문 받기"):
@@ -95,23 +95,16 @@ if st.button("첫 질문 받기"):
         st.error(f"서버 요청 실패: {e}")
 
 #############################################
-# 5. (C) 챗봇 대화 즉시 출력 (수정 완료)
+# 5. (C) 사용자 입력(챗봇) -> AI 응답
 #############################################
 st.subheader("💬 챗봇 대화 진행")
-
-# 대화 내역을 출력
-for msg in st.session_state.chat_history:
-    role = msg["role"]
-    content = msg["content"]
-    with st.chat_message(role):
-        st.write(content)
 
 # 사용자 입력
 user_input = st.chat_input("답변을 입력해보세요")
 if user_input:
-    add_message("user", user_input)  # 🔹 사용자 입력 즉시 출력
-
-    # 🔹 FastAPI 요청 후 즉시 응답 추가
+    # 사용자 메시지
+    add_message("user", user_input)
+    # AI 응답
     try:
         resp = st.session_state.s.post(
             f"{API_URL}/followup_question",
@@ -122,15 +115,23 @@ if user_input:
             emotion = data.get("emotion", "")
             followup_q = data.get("followup_question", "")
             answer_text = f"감정: {emotion}\n\n{followup_q}"
-            add_message("assistant", answer_text)  # 🔹 AI 응답 즉시 출력
+            add_message("assistant", answer_text)
+        else:
+            st.error(f"오류 발생: {resp.text}")
     except Exception as e:
-        add_message("assistant", f"서버 요청 실패: {e}")
+        st.error(f"서버 요청 실패: {e}")
+
+# 대화 내역 표시
+for msg in st.session_state.chat_history:
+    role = msg["role"]
+    content = msg["content"]
+    with st.chat_message(role):
+        st.write(content)
 
 #############################################
-# 6. (D) "일기 마무리하기" 버튼 -> 초안 생성
+# 6. (D) "일기 마무리하기" -> 초안 생성
 #############################################
 def on_click_summarize():
-    """일기 마무리 버튼 클릭 시"""
     try:
         r = st.session_state.s.get(f"{API_URL}/summarize_conversation")
         if r.status_code == 200:
@@ -143,13 +144,16 @@ def on_click_summarize():
     except Exception as e:
         st.error(f"서버 요청 실패: {e}")
 
+#############################################
+# 7. 사이드바 버튼
+#############################################
 with st.sidebar:
     st.title("🛠 메뉴")
     st.markdown("---")
     st.button("일기 마무리하기", on_click=on_click_summarize)
 
 #############################################
-# 7. (E) "일기 초안 & 수정"
+# 8. (E) 일기 초안 & 수정
 #############################################
 if st.session_state.diary_completed:
     st.subheader("📝 일기 초안")
@@ -165,25 +169,29 @@ if st.session_state.diary_completed:
     if st.button("최종 일기 만들기"):
         st.session_state.final_diary = user_changes.strip()
         st.success("수정된 최종 일기가 생성되었습니다.")
-        st.write(f"**✍️ 최종 일기:**\n{st.session_state.final_diary}")  # 🔹 버튼 아래에 출력
 
 #############################################
-# 8. (F) 노래 추천 (출력 정상화 + 유사도 & 감정 추가)
+# 9. 노래 추천 (최종 일기 & 결과 유지)
 #############################################
 if st.session_state.final_diary:
+    # (A) 최종 일기 표시 (노래 추천 누른 뒤에도 계속 보이게)
+    st.subheader("✍️ 최종 일기")
+    st.write(st.session_state.final_diary)
+
+    # (B) 노래 추천 버튼
     def on_click_recommend():
-        """최종 일기를 바탕으로 트로트 추천"""
         try:
             r = st.session_state.s.get(f"{API_URL}/recommend_song")
             if r.status_code == 200:
                 data = r.json()
-                song = data.get("recommended_song", {})
-                title = song.get("title", "제목 없음")
-                artist = song.get("artist", "알 수 없음")
-                lyrics = "\n".join(song.get("lyrics", "").split("\n")[:3])  # 🔹 가사 2~3줄만 표시
+                title = data["recommended_song"]["title"]
+                artist = data["recommended_song"]["artist"]
+                raw_lyrics = data["recommended_song"]["lyrics"]
+                lyrics = "\n".join(raw_lyrics.split("\n")[:3])  # 가사 2~3줄
                 similarity = data.get("similarity", "N/A")
                 final_emotion = data.get("final_emotion", "N/A")
 
+                # 노래 추천 텍스트 저장
                 st.session_state.song_recommendation = f"""
                 ### 🎵 {title} - {artist}  
                 **유사도:** {similarity}  
@@ -191,7 +199,6 @@ if st.session_state.final_diary:
                 **🎼 가사:**  
                 {lyrics}...
                 """
-
             else:
                 st.error(f"추천 실패: {r.text}")
         except Exception as e:
@@ -200,6 +207,6 @@ if st.session_state.final_diary:
     with st.sidebar:
         st.button("🎶 노래 추천 받기", on_click=on_click_recommend)
 
+    # (C) 노래 추천 출력 (결과가 있으면 표시)
     if st.session_state.song_recommendation:
-        st.markdown(st.session_state.song_recommendation)  # 🔹 노래 추천 출력
-
+        st.markdown(st.session_state.song_recommendation)

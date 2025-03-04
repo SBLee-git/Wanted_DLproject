@@ -24,13 +24,16 @@ st.title("Deep Diary")
 uploaded_file = st.file_uploader("오늘의 사진을 업로드해주세요", type=["jpg", "jpeg", "png"])
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
-    st.image(image, caption=None, use_column_width=True)
+    st.image(image, caption=None, use_container_width=True)
 
     img_bytes = io.BytesIO()
-    image.save(img_bytes, format="PNG")
+    image.save(img_bytes, format=image.format)  # 원본 포맷 유지
     img_bytes = img_bytes.getvalue()
 
-    files = {'file': ('uploaded_image.png', img_bytes, 'image/png')}
+    # 원본 파일명 유지
+    file_name = uploaded_file.name
+
+    files = {'file': (file_name, img_bytes, f'image/{image.format.lower()}')}
     response = requests.post(f"{API_URL}/generate_caption", files=files)
 
     if response.status_code != 200:

@@ -71,7 +71,7 @@ http://100.83.113.125:8031/docs
 
 ### streamlit 서버 실행 및 테스트
 ```
-$ streamlit run  service/app.py --server.port 8531
+$ streamlit run service/app.py --server.port 8531
 ```
 http://localhost:8531
 http://192.168.10.96:8531

@@ -13,6 +13,7 @@ active_sessions = {}
 def get_or_create_client_id(request: Request, response: Response) -> str:
     """쿠키에서 `client_id` 확인하고 없으면 새로 생성하여 쿠키에 저장"""
     client_id = request.cookies.get("client_id")
+    print("client_id:", client_id)
     if not client_id:
         client_id = str(uuid.uuid4())  # 새로운 client_id 생성
         response.set_cookie(key="client_id", value=client_id, httponly=True, max_age=86400)  # 하루 유지

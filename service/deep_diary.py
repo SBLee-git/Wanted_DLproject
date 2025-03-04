@@ -4,11 +4,17 @@ import os
 # 프로젝트 루트 디렉토리를 파이썬 경로에 추가
 sys.path.append(os.path.abspath("."))
 
+import json
 from models.llm_gemini import generate_question_from_caption, generate_followup_question, generate_diary_draft, incorporate_user_changes
 from models.image_captioning import LlavaImageCaptioning
 from models.emotion_classification import EmotionClassifier
 from models.semantic_embedding import E5Embedder, SongRecommender
 # from models.insights import generate_insights
+
+caption_generator = LlavaImageCaptioning()
+emotion_classifier = EmotionClassifier()
+embedder = E5Embedder()
+song_recommander = SongRecommender()
 
 
 class ChatbotService:
@@ -21,15 +27,15 @@ class ChatbotService:
     - 감정 분석 기반 인사이트 제공
     """
 
-    def __init__(self):
+    def __init__(self, session_id: str):
+        self.session_id = session_id
+        self.session_path = os.path.join("service/logs", session_id)
+        os.makedirs(self.session_path, exist_ok=True)
+        
         self.caption = ""  # 이미지 캡션 저장
         self.conversation_history = []  # 대화 기록
         self.emotion_history = []  # 감정 기록 (사용자 감정 분류 데이터)
         self.diary_summary = ""
-        self.caption_generator = LlavaImageCaptioning()
-        self.emotion_classifier = EmotionClassifier()
-        self.embedder = E5Embedder()
-        self.song_recommander = SongRecommender()
 
     def record_interaction(self, speaker: str, content: str) -> None:
         """
@@ -52,14 +58,14 @@ class ChatbotService:
             str: 생성된 이미지 캡션
         """
         if is_file:
-            image = self.caption_generator.load_image_from_file(image_source)
+            image = caption_generator.load_image_from_file(image_source)
         else:
-            image = self.caption_generator.load_image_from_url(image_source)
+            image = caption_generator.load_image_from_url(image_source)
 
         if image is None:
             raise ValueError("이미지를 불러올 수 없습니다. URL 또는 파일 경로를 확인하세요.")
 
-        self.caption, _ = self.caption_generator.generate_caption(image)
+        self.caption, _ = caption_generator.generate_caption(image)
         return self.caption
 
     def generate_initial_question(self) -> str:
@@ -80,7 +86,7 @@ class ChatbotService:
         self.record_interaction("User", user_answer)
 
         # 감정 분석
-        emotion_result = self.emotion_classifier.predict_emotion(user_answer)
+        emotion_result = emotion_classifier.predict_emotion(user_answer)
         self.emotion_history.append(emotion_result)
 
         # 후속 질문 생성
@@ -94,7 +100,7 @@ class ChatbotService:
         일기 초안을 위한 대화 내용 요약
         """
         summary = generate_diary_draft(self.conversation_history)
-        total_emotion = self.emotion_classifier.predict_emotion(summary)
+        total_emotion = emotion_classifier.predict_emotion(summary)
         self.emotion_history.append(total_emotion)
         self.diary_summary = summary
         return
@@ -104,10 +110,29 @@ class ChatbotService:
         사용자의 의견을 반영한 일기 초안 새로 생성
         """
         summary_new = incorporate_user_changes(original_draft=self.diary_summary, user_changes=user_changes)
-        total_emotion = self.emotion_classifier.predict_emotion(summary_new)
+        total_emotion = emotion_classifier.predict_emotion(summary_new)
         self.emotion_history.append(total_emotion)
         self.diary_summary = summary_new
         return
+    
+    def save_diary(self, diary: str="") -> str:
+        """
+        사용자 작성 일기 저장
+        """
+        self.diary = diary
+        self.save_conversation()
+        return
+    
+    def save_conversation(self):
+        """대화 내역을 JSON 파일로 저장"""
+        file_path = os.path.join(self.session_path, "conversation.json")
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump({
+                "conversation": self.conversation_history,
+                "emotion_history": self.emotion_history,
+                "diary_summary": self.diary_summary,
+                "diary": self.diary
+            }, f, ensure_ascii=False, indent=4)
 
     def recommend_song(self) -> str:
         """
@@ -117,8 +142,8 @@ class ChatbotService:
             return "아직 감정 데이터를 분석하지 않았습니다."
         final_emotion = self.emotion_history[-1]
         text = self.diary_summary
-        embedding = self.embedder.get_embedding(text)
-        recommend_info = self.song_recommander.recommend_song(embedding, final_emotion)
+        embedding = embedder.get_embedding(text)
+        recommend_info = song_recommander.recommend_song(embedding, final_emotion)
         print(recommend_info)
         return recommend_info
 

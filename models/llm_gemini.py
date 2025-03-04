@@ -79,6 +79,35 @@ def generate_diary_draft(conversation_history: list) -> str:
     return response.text.strip()
 
 
+def incorporate_user_changes(original_draft, user_changes) -> str:
+    """
+    - original_draft: Gemini가 생성한 '초기 일기 초안'
+    - user_changes: 사용자가 수정하고 싶은 내용 (여러 줄)
+    이 둘을 합쳐, 최종 버전을 다시 Gemini에게 요청하여 생성.
+    """
+    prompt = f"""
+    요청사항: {ROLE_DESCRIPTION}
+    아래는 일기 초안입니다:
+    ===
+    {original_draft}
+    ===
+
+    사용자가 다음과 같은 수정 사항을 제시했습니다:
+    ===
+    {user_changes}
+    ===
+
+    위 수정 사항을 충실히 반영하면서도, 전체 글이 자연스럽게 이어지도록
+    최종 일기를 만들어 주세요. 초안의 분위기와 톤을 유지하되,
+    사용자의 수정이 우선 적용되어야 합니다.
+    초안 처럼 '앞으로도 매일 일기를 쓰고 싶어지는' 동기가 될 만한 따뜻하고 희망적인 문장들을 포함해주세요.
+    간결하면서도, 사용자가 자신을 돌아볼 수 있는 한두 문장과
+    내일 혹은 다음 일기를 위한 작은 다짐이나 기대감이 느껴지도록 작성해 주세요.
+    
+    """
+    response = model.generate_content(prompt)
+    return response.text
+
 # =================== 🎯 기능 테스트용 Main 블록 ===================
 if __name__ == "__main__":
     print("\n💡 Gemini 기반 일기 작성 도우미 테스트 시작!")

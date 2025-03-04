@@ -66,6 +66,7 @@ $ python ./service/deep_diary.py
 $ uvicorn service.main:app --host 0.0.0.0 --port 8031 --reload
 ```
 http://localhost:8031/docs
+http://192.168.10.96:8031/docs
 http://100.83.113.125:8031/docs
 
 ### streamlit 서버 실행 및 테스트

@@ -4,7 +4,7 @@ import os
 # 프로젝트 루트 디렉토리를 파이썬 경로에 추가
 sys.path.append(os.path.abspath("."))
 
-from models.llm_gemini import generate_question_from_caption, generate_followup_question, generate_diary_draft
+from models.llm_gemini import generate_question_from_caption, generate_followup_question, generate_diary_draft, incorporate_user_changes
 from models.image_captioning import LlavaImageCaptioning
 from models.emotion_classification import EmotionClassifier
 from models.semantic_embedding import E5Embedder, SongRecommender
@@ -97,6 +97,16 @@ class ChatbotService:
         total_emotion = self.emotion_classifier.predict_emotion(summary)
         self.emotion_history.append(total_emotion)
         self.diary_summary = summary
+        return
+    
+    def regenerate_summarize(self, user_changes) -> str:
+        """
+        사용자의 의견을 반영한 일기 초안 새로 생성
+        """
+        summary_new = incorporate_user_changes(original_draft=self.diary_summary, user_changes=user_changes)
+        total_emotion = self.emotion_classifier.predict_emotion(summary_new)
+        self.emotion_history.append(total_emotion)
+        self.diary_summary = summary_new
         return
 
     def recommend_song(self) -> str:

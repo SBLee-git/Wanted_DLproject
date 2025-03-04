@@ -14,7 +14,7 @@ UPLOAD_DIR = "./uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-# ✅ 1️⃣ 이미지 캡션 생성 (URL 또는 파일)
+# 이미지 캡션 생성 (URL 또는 파일)
 @app.post("/generate_caption")
 async def generate_caption(
     img_url: str = Form(None),  # URL 입력 가능
@@ -49,7 +49,7 @@ async def generate_caption(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ✅ 2️⃣ 첫 번째 질문 생성 (GET)
+# 첫 번째 질문 생성 (GET)
 @app.get("/initial_question")
 async def initial_question():
     """
@@ -62,7 +62,7 @@ async def initial_question():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ✅ 3️⃣ 사용자 답변 후 후속 질문 생성 (POST)
+# 사용자 답변 후 후속 질문 생성 (POST)
 class UserAnswerRequest(BaseModel):
     user_answer: str
 
@@ -82,7 +82,7 @@ async def followup_question(request: UserAnswerRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ✅ 4️⃣ 대화 요약 및 감정 분석 (GET)
+# 대화 요약 및 감정 분석 (GET)
 @app.get("/summarize_conversation")
 async def summarize_conversation():
     """
@@ -96,9 +96,24 @@ async def summarize_conversation():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+# 일기 초안 재생성 (POST)
+@app.post("/regenerate_summarize")
+async def regenerate_summarize(user_changes):
+    """
+    일기 초안을 새로 생성하는 API
+    """
+    try:
+        chatbot.regenerate_summarize(user_changes)
+        return {
+            "diary_summary": chatbot.diary_summary,
+            "final_emotion": chatbot.emotion_history[-1]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-# ✅ 5️⃣ 트로트 추천 (GET)
+# 트로트 추천 (GET)
 @app.get("/recommend_song")
 async def recommend_song():
     """

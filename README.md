@@ -55,6 +55,17 @@
 
 https://www.notion.so/DL_project-1a0aa52f04eb80798a9cc87b0f1f506f
 
+---
+
+## 서비스 화면
+
+![서비스 스크린샷 초기 화면](./assets/screenshot_main.png)
+![서비스 스크린샷 이미지 업로드](./assets/screenshot_upload.png)
+![서비스 스크린샷 챗봇 대화](./assets/screenshot_chat.png)
+![서비스 스크린샷 일기 초안](./assets/screenshot_summary.png)
+![서비스 스크린샷 일기 초안 재작성](./assets/screenshot_resummary.png)
+![서비스 스크린샷 트로트 추천](./assets/screenshot_recommand.png)
+---
 
 ## GIT 명령어 관련
 ### git clone
@@ -117,6 +128,7 @@ $ python ./service/deep_diary.py
 ### FastAPI 백엔드 실행 및 테스트
 ```
 $ uvicorn service.main:app --host 0.0.0.0 --port 8031 --reload
+$ nohup uvicorn service.main:app --host 0.0.0.0 --port 8031 > service/logs/uvicorn.out 2>&1 &  # 시연
 ```
 http://localhost:8031/docs
 http://192.168.10.96:8031/docs
@@ -125,6 +137,7 @@ http://100.83.113.125:8031/docs
 ### streamlit 프론트엔드 실행 및 테스트
 ```
 $ streamlit run service/app.py --server.port 8531
+$ nohup streamlit run service/app.py --server.port 8531 > service/logs/streamlit.out 2>&1 &  # 시연
 ```
 http://localhost:8531
 http://192.168.10.96:8531
